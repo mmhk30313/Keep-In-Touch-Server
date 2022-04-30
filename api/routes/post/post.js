@@ -7,6 +7,7 @@ const { authenticateJWT } = require("../auth/auth");
 
 router.get('/post/get/all', (req, res) => {
     User.find({}, (err, users) => {
+        console.log({users});
         if (err) {
             return res.status(500).json({
                 status: false,
