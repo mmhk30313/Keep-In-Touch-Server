@@ -1,23 +1,26 @@
 const express = require("express");
 const path = require("path");
+const fileUpload = require("express-fileupload");
 // const axios = require("axios");
 // const redis = require("redis");
 const app = express();
-const dotenv = require("dotenv");
+require("./configs/env.config");
 const cors = require('cors');
 const bodyParser = require("body-parser");
+
 // API PATH
+const route_paths = require("./paths/route_path.js");
 const rootPath = require("./api/routes/root");
-const userPath = require("./api/routes/user");
-dotenv.config();
 
 //middleware
 app.use(express.json());
+app.use(fileUpload());
 app.use(cors());
 app.use(bodyParser.json());
 app.use(cors({origin: true}));
+// console.log({paths});
 app.use(rootPath);
-app.use('/api', userPath);
+route_paths?.map(route_path => app.use('/api', route_path));
 
 // MongoDB Connection With Mongoose
 require("./configs/db.config");

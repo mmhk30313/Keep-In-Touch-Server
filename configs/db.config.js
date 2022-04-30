@@ -17,7 +17,7 @@ let dbNameLocal = 'KeepInTouch';
 let dbNameLive = 'keep_in_touch';
 let dbUserNameLive = 'keep_in_touch';
 
-if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
+if (process.env.NODE_ENV === "development") {
   
   console.log("Running at Development State");
 
