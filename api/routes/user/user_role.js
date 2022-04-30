@@ -3,7 +3,6 @@ const router = express.Router();
 const fs = require('fs');
 const User = require("../../models/User/User");
 const UserRole = require("../../models/User/UserRole");
-// const user_role_enum = require("../../enums/user_role_enum");
 const { authenticateJWT } = require("../auth/auth");
 
 // User role create only for admin
