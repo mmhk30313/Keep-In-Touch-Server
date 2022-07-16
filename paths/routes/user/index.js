@@ -1,180 +1,26 @@
 const express = require("express");
 const router = express.Router();
-const fs = require('fs');
-const User = require("../../models/User/User");
-const UserRole = require("../../models/User/UserRole");
+const { user_update_by_user, find_all_users, delete_user, find_user_by_email, find_user_details, make_admin } = require("../../../api/controllers/user");
 // const user_role_enum = require("../../enums/user_role_enum");
-const { authenticateJWT } = require("../auth/auth");
 
 // User update only for user
-router.post('/user/update', async (req, res) => {
-    await authenticateJWT(req, res);
-    if(req?.auth){
-        const {body: user_body, files} = req;
-        let {email: user_email} = user_body;
-        delete user_body.email;
-        // console.log({user_body, email});
-        if(user_email != req?.user?.email){
-            user_email = req?.user?.email;
-            return res.status(404).json({
-                status: false,
-                message: "User is unauthorized!!!"
-            })
-        }
-        try {
-            let img_folder = user_email;
-            const img_name = "avatar.png";
-            if(files){
-                const root_url = process.env.DEV_URL || process.env.PROD_URL;
-                img_path = `${root_url}/api/static/${img_folder}/${img_name}`;
-                // console.log({img_path});
-                user_body.avatar = img_path;
-            }
-            const result = await User.updateOne({email: user_email}, user_body, {returnOriginal: false});
-            if(result?.modifiedCount){
-                if(files){
-                    let root_path = "/uploads/" + img_folder;
-                    if(!fs.existsSync(appRoot+"/uploads")){
-                        fs.mkdirSync(appRoot+"/uploads");
-                    }
-                    const uploadedFile = files?.uploadedImg || files?.avatar;
-                    if(!fs.existsSync(appRoot+root_path)){
-                        fs.mkdirSync(appRoot+root_path);
-                    }
-                    root_path += "/" + img_name;
-                    // console.log({root_path});
-                    const uploadPath = appRoot + root_path;
-                    await uploadedFile.mv(uploadPath);
-                }
-                const updated_user = await User.findOne({email: user_email}).select("-_id first_name email avatar");
-                // console.log({updated_user});
-                return res.status(404).json({
-                    status: true,
-                    message: "User is updated!!!",
-                    data: updated_user,
-                });
-
-            }
-            return res.status(404).json({
-                status: false,
-                message: "User isn't found to update!!!"
-            });
-        } catch (error) {
-            return res.status(503).json({
-                success: false,
-                message: error?.message || "Something wrong to update this user"
-            })
-            
-        }
-    }
-});
+router.post('/user/update', user_update_by_user);
 
 // Get all users only for admin
-router.get('/user/all', async(req, res) => {
-    await authenticateJWT(req, res);
-    if(req?.auth){
-        try {
-            const users = await User.find({})
-                            .select("_id user_name avatar address gender phone email lat lan isVerified role_id is_active email_verified_at");
-            
-            console.log({user_length: users?.length});
-            if(users?.length){
-                return res.status(200).json({
-                    status: true,
-                    data: users,
-                })
-            }
-            return res.status(400).json({
-                status: false,
-                message: "There is no user!!!"
-            })
+router.get('/user/all', find_all_users);
 
-        } catch (error) {
-            return res.status(404).json({
-                status: false,
-                message: error?.message || "Server error!!!"
-            })
-        }
-    }
-});
+// find a user details by user email
+router.get('/user/find-one', find_user_by_email);
 
-// find user by user email for admin and that user
-router.get('/user/find-one', async(req, res) => {
-    await authenticateJWT(req, res);
-    if(req?.auth){
-        let {email} = req?.query;
-        try {
-            const user = await User.findOne({email})
-                            .select("_id user_name avatar address gender phone email lat lan is_active email_verified_at");
-            
-            console.log({user_length: user});
-            if(user){
-                return res.status(200).json({
-                    status: true,
-                    data: user,
-                })
-            }
-            return res.status(400).json({
-                status: false,
-                message: "There is no user by this email!!!"
-            })
 
-        } catch (error) {
-            return res.status(404).json({
-                status: false,
-                message: error?.message || "Server error!!!"
-            })
-        }
-    }
-});
+// User details by accessToken
+router.get('/user/details', find_user_details);
+
+// Admin can make a user as an admin
+router.post('/user-make/admin', make_admin);
 
 // User delete only for admin
-router.delete('/user/delete', async(req, res) => {
-    await authenticateJWT(req, res);
-    if(req?.auth){
-        if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin" || req?.user?.role_id === 30313){
-
-            try {
-                let {email} = req?.body;
-                if(!email){
-                    email = req?.params?.email; 
-                }
-                if(!role_id){
-                    email = req?.query?.email;
-                }
-                const exits_user_res = await User.findOne({email});
-                if(exits_user_res?._doc?.email){
-                    const user_delete_res = await User.deleteOne({email});
-                    // console.log({role_res});
-                    if(user_delete_res){
-                        return res.status(200).json({
-                            status: true,
-                            message: "The user is successfully deleted!!!",
-                        });
-                    }
-                    return res.status(403).json({
-                        status: false,
-                        message: "The user isn't deleted!!!"
-                    })
-                }
-                return res.status(400).json({
-                    status: false,
-                    message: "The user isn't exists to delete by this email"
-                })
-    
-            } catch (error) {
-                return res.status(404).json({
-                    status: false,
-                    message: error?.message || "Server error!!!"
-                })
-            }
-        }
-        return res.status(400).json({
-            status: false,
-            message: "User isn't authorized to update user role!!!"
-        })
-    }
-});
+router.delete('/user/delete', delete_user);
 
 // User role create only for admin
 // router.post('/user-role/create', async(req, res) => {
@@ -412,47 +258,6 @@ router.delete('/user/delete', async(req, res) => {
 //     }
 // });
 
-// Admin can make a user as an admin
-// router.post('/user-make/admin', async(req, res) => {
-//     await authenticateJWT(req, res);
-//     if(req?.auth){
-//         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin"){
-//         // if(user_role_res?.name === "Admin" || user_role_res?.name === "admin"){
-//             try {
-//                 let {email} = req?.body;
-//                 const exits_user = await User.findOne({email});
-//                 if(exits_user){
-//                     const role_res = await User.updateOne({email}, {role_id: user_role_res?.role_id});
-//                     // console.log({role_res});
-//                     if(role_res){
-//                         return res.status(200).json({
-//                             status: true,
-//                             message: "The user is successfully made an admin!!!",
-//                         });
-//                     }
-//                     return res.status(403).json({
-//                         status: false,
-//                         message: "The user isn't made an admin!!!"
-//                     })
-//                 }
-//                 return res.status(400).json({
-//                     status: false,
-//                     message: "The user isn't exists to make admin by this email"
-//                 })
-    
-//             } catch (error) {
-//                 return res.status(404).json({
-//                     status: false,
-//                     message: error?.message || "Server error!!!"
-//                 })
-//             }
-//         }
-//         return res.status(400).json({
-//             status: false,
-//             message: "User isn't authorized to make admin user!!!"
-//         })
-//     }
 
-// });
 
 module.exports = router;

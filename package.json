@@ -2,7 +2,7 @@
   "name": "keep-in-touch",
   "version": "1.0.0",
   "description": "It's a keep in touch app with mongodb database",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",

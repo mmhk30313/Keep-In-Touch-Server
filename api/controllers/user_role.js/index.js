@@ -1,12 +1,8 @@
-const express = require("express");
-const router = express.Router();
 const fs = require('fs');
 const User = require("../../models/User/User");
 const UserRole = require("../../models/User/UserRole");
-const { authenticateJWT } = require("../auth/auth");
 
-// User role create only for admin
-router.post('/user-role/create', async(req, res) => {
+exports.create_user_role = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin" || req?.user?.role_id === 2){
@@ -44,15 +40,14 @@ router.post('/user-role/create', async(req, res) => {
                 })
             }
         }
-        return res.status(400).json({
+        return res.status(401).json({
             status: false,
             message: "User isn't authorized to create user role!!!"
         })
     }
-});
+}
 
-// Get all user-roles only from frontend
-router.get('/user-role/admin/all', async(req, res) => {
+exports.find_all_user_roles = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         // const {email: auth_user_email} = req?.user;
@@ -84,38 +79,17 @@ router.get('/user-role/admin/all', async(req, res) => {
             status: false,
             message: "User isn't authorized to to find user!!!"
         })
+    }else {
+        return res.status(401).json({
+            status: false,
+            message: "User isn unauthorized!!!"
+        })
     }
     
-});
+    
+}
 
-// Get all user-roles only for admin
-// router.get('/user-role/all', async(req, res) => {
-//     try {
-//         const user_roles = await UserRole.find({name: {$nin: ["Admin", "admin"]}})
-//                            .select("-_id role_id name slug");
-        
-//         console.log("====284====",{user_role_length: user_roles?.length});
-//         if(user_roles?.length){
-//             return res.status(200).json({
-//                 status: true,
-//                 data: user_roles,
-//             })
-//         }
-//         return res.status(400).json({
-//             status: false,
-//             message: "There is no user role!!!"
-//         })
-
-//     } catch (error) {
-//         return res.status(404).json({
-//             status: false,
-//             message: error?.message || "Server error!!!"
-//         })
-//     }
-// });
-
-// find user_role by user role_id for admin
-router.get('/user-role/find-one', async(req, res) => {
+exports.find_user_role = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin"){
@@ -146,11 +120,15 @@ router.get('/user-role/find-one', async(req, res) => {
             status: false,
             message: "User isn't authorized to to find user role!!!"
         })
+    }else{
+        return res.status(400).json({
+            status: false,
+            message: "User isn unauthorized!!!"
+        })
     }
-});
+}
 
-// User role update only for admin
-router.post('/user-role/update', async(req, res) => {
+exports.update_user_role = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin"){
@@ -192,11 +170,15 @@ router.post('/user-role/update', async(req, res) => {
             status: false,
             message: "User isn't authorized to update user role!!!"
         })
+    }else{
+        return res.status(400).json({
+            status: false,
+            message: "User isn unauthorized!!!"
+        })
     }
-});
+}
 
-// User role update only for admin
-router.delete('/user-role/delete', async(req, res) => {
+exports.delete_user_role = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin"){
@@ -240,11 +222,15 @@ router.delete('/user-role/delete', async(req, res) => {
             status: false,
             message: "User isn't authorized to update user role!!!"
         })
+    }else{
+        return res.status(40).json({
+            status: false,
+            message: "User isn't authorized to update user role!!!"
+        })
     }
-});
+}
 
-// Admin can make a user as an admin
-router.post('/user-make/admin', async(req, res) => {
+exports.make_admin = async(req, res) => {
     await authenticateJWT(req, res);
     if(req?.auth){
         if(req?.user?.user_role === "Admin" || req?.user?.user_role === "admin"){
@@ -282,8 +268,11 @@ router.post('/user-make/admin', async(req, res) => {
             status: false,
             message: "User isn't authorized to make admin user!!!"
         })
+    }else{
+        return res.status(400).json({
+            status: false,
+            message: "User isn unauthorized!!!"
+        })
     }
 
-});
-
-module.exports = router;
+}

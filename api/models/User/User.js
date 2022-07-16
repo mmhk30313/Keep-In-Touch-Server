@@ -45,9 +45,8 @@ const UserSchema = new mongoose.Schema(
     description: {
         type: String,
     },
-    postList:[
-        String
-    ],
+    following: [String],
+    followers: [String],
     lat: {
         type: Number,
         length: 10,
@@ -85,8 +84,6 @@ const UserSchema = new mongoose.Schema(
     },
     remember_token: {
         type: String,
-        max: 100,
-        length: 100,
         default: ""
     }
   },

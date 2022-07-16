@@ -1,10 +1,9 @@
 const all_paths = [
-    require('../api/routes/root'),
-    require('../api/routes/upload'),
-    require('../api/routes/signup-login/signup-login'),
-    require('../api/routes/user/user'),
-    require('../api/routes/user/user_role'),
-    require('../api/routes/post/post'),
+    require('../paths/routes/root'),
+    require('../paths/routes/signup-login'),
+    require('../paths/routes/user'),
+    require('../paths/routes/user_role'),
+    require('../paths/routes/post'),
 ];
 
 module.exports = all_paths;

@@ -3,7 +3,7 @@ require('../../configs/env.config');
 
 // Upload any image file by
 const uploadFile = async(destination, imageFile, image_name, previous_path = "", mimeType = ".png", size) => {
-    // console.log({image_destination: destination});
+    console.log({image_destination: destination});
     // console.log({previous_path});
     if(previous_path){
         let prev_img_path = "/uploads" + previous_path?.match(`/api/static(.*)`)[1];
@@ -21,14 +21,14 @@ const uploadFile = async(destination, imageFile, image_name, previous_path = "",
     }
     await des_array.forEach(async(path) => {
         img_path += "/"+path;
-        // console.log({img_path});
+        console.log({img_path});
         if(!fs.existsSync(img_path)){
             fs.mkdirSync(img_path);
         }
     });
     const image = img_path + "/" + image_name + mimeType;
     await imageFile.mv(image);
-    const root_path = process.env.DEV_URL || process.env.DEV_URL;
+    const root_path = process.env.DEV_URL || process.env.PROD_URL;
     return (root_path+"/api/static"+destination+"/"+image_name+mimeType);
 }
 
